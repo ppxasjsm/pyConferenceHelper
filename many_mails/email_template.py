@@ -9,6 +9,7 @@ import time
 from random import randint
 import getpass
 import argparse
+import os
 
 __author__ = "Antonia Mey"
 __email__ = "antonia.mey@fu-berlin.de"
@@ -42,10 +43,20 @@ class MassEmail ( object ):
         msg['From'] = fromEmail
         msg['To'] = toEmail
         for filename in files:
-           f = file(filename)
-           attachment = MIMEText(f.read())
-           attachment.add_header('Content-Disposition', 'attachment', filename=filename)           
-           msg.attach(attachment)
+            extension = os.path.splitext(filename)[1]
+            if extension == 'pdf':
+                f = file(filename)
+                fp = open(filename, 'rb')
+                pdfAttachment = MIMEApplication(fp.read(), 'pdf')
+                fp.close()
+            
+                pdfAttachment.add_header('Content-Disposition', 'attachment', filename = filename)
+                msg.attach(pdfAttachment)
+            else:
+                f = file(filename)
+                attachment = MIMEText(f.read())
+                attachment.add_header('Content-Disposition', 'attachment', filename=filename)           
+                msg.attach(attachment)
         
         content = MIMEText(self.body, 'plain')
         msg.attach(content)
